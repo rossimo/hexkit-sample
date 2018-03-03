@@ -1,64 +1,96 @@
 import 'bootstrap/dist/css/bootstrap.css'
 
-import { createStore, State, rotateTile, selectTile, listenMouse, TileCoord, setTool } from 'hexkit'
+import {
+    createStore, State, rotateTile, selectTile, Tools,
+    listenMouse, TileCoord, setTool, Map, flipTile, Tile, ITileInfo
+} from 'hexkit'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import { Button } from 'reactstrap'
+import * as  jsonFormat from 'json-format'
+import { Button, Row, Alert, Container, Col } from 'reactstrap'
 import { connect, Provider } from 'react-redux'
 import { Dispatch } from 'redux'
+import * as _ from 'lodash'
 import { last } from 'lodash'
 import { ipcRenderer as ipc } from 'electron'
 
-const INSPECT_TOOL: string = 'INSPECT_TOOL'
+const INSPECT_TOOL = Tools.Info
+
+const indexToCoordinate = (index: number, map: Map): TileCoord =>
+    index > -1
+        ? {
+            x: index % map.width,
+            y: Math.floor(index / map.width)
+        }
+        : null
+
 
 interface In {
-    state: State
+    appState: State
 }
 
 interface Out {
-    enableInspectTool: () => void
+    startInspecting: () => void
     selectTile: (coordinate: TileCoord) => void
+    rotateTile: (coord: TileCoord) => void
+    flipTile: (coord: TileCoord) => void
 }
 
-class PluginComponent extends React.Component<In & Out> {
-    private stopListener: Function
-
-    componentWillMount() {
-        let { state, selectTile } = this.props
-
-        this.stopListener = listenMouse((event, args) => {
-            let coordinate = last(args.coordinates)
-            if (coordinate) selectTile(coordinate)
-        })
+let PluginComponent = ({ appState, startInspecting, rotateTile, flipTile }: In & Out) => {
+    let inspecting = appState.tool == INSPECT_TOOL
+    let tile: Tile
+    let coordinate: TileCoord
+    if (inspecting) {
+        let index = _.findIndex(appState.map.infoLayer, info => info.selected)
+        coordinate = indexToCoordinate(index, appState.map)
+        tile = appState.map.layers[0].tiles[index]
     }
 
-    componentWillUnmount() {
-        this.stopListener()
-    }
-
-    render() {
-        let { state, enableInspectTool } = this.props
-        let inspecting = state.tool == INSPECT_TOOL
-
-        return <div>
-            <Button
-                color={inspecting ? 'primary' : 'secondary'}
-                onClick={() => enableInspectTool()}>
-                Inspect Tool
-            </Button>
-            <br /><br />
-            The first tile's URI is {state.map.layers[0].tiles[0].source}
-        </div>
-    }
+    return <Container fluid={true} style={{ paddingTop: 10, paddingBottom: 10 }}>
+        <Row>
+            <Col style={{ display: 'flex', justifyContent: 'center' }}>
+                <Button
+                    color={inspecting ? 'primary' : 'secondary'}
+                    onClick={() => startInspecting()}>
+                    {inspecting ? 'Inspecting' : 'Click To Inspect'}
+                </Button>
+            </Col>
+        </Row>
+        {coordinate && <Row>
+            <Col style={{ paddingTop: 10 }}>
+                <Alert color="secondary">
+                    <pre style={{ margin: 0 }}><code>
+                        {jsonFormat(tile, {
+                            type: 'space',
+                            size: 4
+                        })}
+                    </code></pre>
+                </Alert>
+            </Col>
+        </Row>}
+        {coordinate && <Row>
+            <Col style={{ display: 'flex', justifyContent: 'center' }}>
+                <Button onClick={() => rotateTile(coordinate)}>
+                    Rotate
+                </Button>
+                &nbsp;
+                <Button onClick={() => flipTile(coordinate)}>
+                    Flip
+                </Button>
+            </Col>
+        </Row>}
+    </Container>
 }
 
 let Plugin = connect<In, Out>(
     (state: State) => ({
-        state
+        appState: state
     }),
     (dispatch: Dispatch<State>) => ({
         selectTile: (coordinate: TileCoord) => dispatch(selectTile(coordinate)),
-        enableInspectTool: () => dispatch(setTool(INSPECT_TOOL))
+        startInspecting: () => dispatch(setTool(INSPECT_TOOL)),
+        rotateTile: (coord: TileCoord) => dispatch(rotateTile(coord)),
+        flipTile: (coord: TileCoord) => dispatch(flipTile(coord))
     })
 )(PluginComponent)
 
