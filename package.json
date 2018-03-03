@@ -20,7 +20,7 @@
     "bootstrap": "^4.0.0",
     "copy-webpack-plugin": "^4.5.0",
     "css-loader": "^0.28.10",
-    "hexkit": "^1.0.4",
+    "hexkit": "^1.0.5",
     "json-format": "^1.0.1",
     "lodash": "^4.17.5",
     "react": "^16.2.0",
