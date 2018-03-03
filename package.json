@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "webpack",
-    "start": "webpack-dev-server"
+    "build": "webpack --mode production",
+    "start": "webpack-dev-server",
+    "package": "bestzip plugin.zip dist/*"
   },
   "author": "Ross Squires <ross.squires@gmail.com>",
   "license": "ISC",
@@ -15,6 +16,7 @@
     "@types/react-dom": "^16.0.4",
     "@types/react-redux": "^5.0.15",
     "@types/reactstrap": "^5.0.17",
+    "bestzip": "^1.1.4",
     "bootstrap": "^4.0.0",
     "copy-webpack-plugin": "^4.5.0",
     "css-loader": "^0.28.10",

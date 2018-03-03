@@ -24,7 +24,6 @@ const indexToCoordinate = (index: number, map: Map): TileCoord =>
         }
         : null
 
-
 interface In {
     appState: State
 }
