@@ -4,7 +4,7 @@ The following will fire up a local webserver for development.
 npm start
 ```
 
-You'll want to add a empty plugin Hex Kit with the following `manifest.json`:
+You'll want to add a Hex Kit plugin folder with the following `manifest.json`:
 ```
 {
     "name": "Development",
