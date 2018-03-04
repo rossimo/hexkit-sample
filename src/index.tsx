@@ -11,7 +11,6 @@ import { Button, Row, Alert, Container, Col } from 'reactstrap'
 import { connect, Provider } from 'react-redux'
 import { Dispatch } from 'redux'
 import * as _ from 'lodash'
-import { last } from 'lodash'
 import { ipcRenderer as ipc } from 'electron'
 
 const INSPECT_TOOL = Tools.Info
